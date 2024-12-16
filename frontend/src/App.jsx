@@ -59,7 +59,8 @@ function App() {
                 setResponse(result);
 
                 // Save SHAP plot URL
-                setShapPlotUrl(`${API_URL}/${result.shap_plot_download}`);
+                const shapUrl = new URL(result.shap_plot_download, API_URL).href;
+                setShapPlotUrl(shapUrl);
             } else {
                 alert("Error: Form submission failed");
             }
