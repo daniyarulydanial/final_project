@@ -37,6 +37,8 @@ function App() {
     const [shapPlotUrl, setShapPlotUrl] = useState(null);
     const [zipFileUrl, setZipFileUrl] = useState(null);
 
+    const API_URL = import.meta.env.VITE_BASE_URL;
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
@@ -45,7 +47,7 @@ function App() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch("http://127.0.0.1:8000/predict", {
+            const response = await fetch(`${API_URL}/predict`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData),
@@ -57,7 +59,7 @@ function App() {
                 setResponse(result);
 
                 // Save SHAP plot URL
-                setShapPlotUrl(`http://127.0.0.1:8000${result.shap_plot_download}`);
+                setShapPlotUrl(`${API_URL}/${result.shap_plot_download}`);
             } else {
                 alert("Error: Form submission failed");
             }
@@ -72,7 +74,7 @@ function App() {
             const formDataToSend = new FormData();
             formDataToSend.append("file", file);
 
-            const response = await fetch("http://127.0.0.1:8000/batch_predict_with_shap", {
+            const response = await fetch(`${API_URL}/batch_predict_with_shap`, {
                 method: "POST",
                 body: formDataToSend,
             });

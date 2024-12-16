@@ -3,6 +3,10 @@ FROM node:18 AS builder
 
 WORKDIR /app
 
+# Pass BASE_URL as a build argument
+ARG BASE_URL
+ENV VITE_BASE_URL=${BASE_URL}
+
 # Copy package files and install dependencies
 COPY package.json package-lock.json ./
 RUN npm install

@@ -9,7 +9,10 @@ services:
     restart: always
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        - BASE_URL=${BASE_URL}  # Pass BASE_URL to the Dockerfile
     container_name: react_frontend
     ports:
       - "3000:3000"
