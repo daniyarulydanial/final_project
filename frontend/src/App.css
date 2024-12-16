@@ -1,0 +1,78 @@
+body {
+  background: #f3f3f3;
+  text-align: center;
+}
+
+.App {
+  background-color: #fff;
+  border-radius: 15px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+  padding: 10px 20px;
+  width: 600px;
+  text-align: center;
+  margin: 30px auto;
+}
+
+h1 {
+  font-size: x-large;
+  color: #327c35;
+}
+
+fieldset {
+  border: none;
+}
+
+input,
+textarea,
+select {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  box-sizing: border-box;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+label {
+  text-align: left;
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #555;
+}
+
+button {
+  padding: 12px;
+  border-radius: 5px;
+  margin: 10px 5px;
+  border: none;
+  color: white;
+  cursor: pointer;
+  background-color: #4caf50;
+  font-size: 16px;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+textarea {
+  resize: none;
+}
+
+.response-container {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.response-container a {
+  color: #327c35;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.response-container a:hover {
+  text-decoration: underline;
+}
