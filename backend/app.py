@@ -82,12 +82,12 @@ def load_resources():
 
     # Define bin classification map
     bin_classification_map = {
-        "bin_1": "Very Reliable",
-        "bin_2": "Reliable",
-        "bin_3": "Average",
-        "bin_4": "Below Average",
-        "bin_5": "Unreliable",
-        "bin_6": "Very Unreliable",
+        "Grade 1": "Very Reliable",
+        "Grade 2": "Reliable",
+        "Grade 3": "Average",
+        "Grade 4": "Below Average",
+        "Grade 5": "Unreliable",
+        "Grade 6": "Very Unreliable"
     }
 
 # Helper function to assign bins
@@ -98,55 +98,99 @@ def assign_bin(proba: float):
     return None, "Unknown"
 
 import tempfile
+import uuid
+
 @app.post("/predict")
 def predict(input: ModelInput):
     try:
-        # Convert input data to DataFrame using model_dump
+        from zipfile import ZipFile
+        # Convert input data to DataFrame
         input_df = pd.DataFrame([input.model_dump()])
-
-        # Preprocess the input
+        # Preprocess and predict
         preprocessed_data = preprocessing_pipeline.transform(input_df)
-
-        # Predict probability
         proba = model_step.predict_proba(preprocessed_data)[0][1]
-
-        # Assign bin
         bin_num, classification = assign_bin(proba)
+        decision = "approve" if classification in ['Very Reliable', 'Reliable', 'Average'] else "reject"
 
-        # Generate SHAP values with preprocessed input
-        feature_names = preprocessing_pipeline[-1].get_feature_names_out()
+        # Generate SHAP values
+        feature_names = list(preprocessing_pipeline[-1].get_feature_names_out())
         explainer = shap.Explainer(model_step, feature_names=feature_names)
         shap_values = explainer(preprocessed_data)
+        explainer_force = shap.Explanation(values=shap_values.values,
+                                           base_values=explainer.expected_value,
+                                           data=preprocessed_data)
+        base_value = explainer.expected_value
+        shap_values_array = shap_values.values
+        data_row = preprocessed_data
 
-        # Create SHAP waterfall plot with larger figure size
-        plt.figure(figsize=(12, 8))  # Adjust figure size here
+        # Use a stable temporary directory
+        temp_dir = tempfile.gettempdir()
+
+        # Use a unique filename to avoid conflicts
+        unique_name = f"shap_plots_{uuid.uuid4()}.zip"
+        zip_file_path = os.path.join(temp_dir, unique_name)
+
+        # Generate and save plots
+        waterfall_path = os.path.join(temp_dir, f"waterfall_{uuid.uuid4()}.png")
+        force_path = os.path.join(temp_dir, f"force_{uuid.uuid4()}.png")
+        decision_path = os.path.join(temp_dir, f"decision_{uuid.uuid4()}.png")
+
+        # SHAP Waterfall Plot
+        plt.figure(figsize=(16 , 10))
         shap.plots.waterfall(shap_values[0], show=False)
+        plt.savefig(waterfall_path, bbox_inches='tight')
+        plt.close()
 
-        # Save the SHAP plot to a temporary file
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as temp_file:
-            temp_file_path = temp_file.name  # Get the temp file path
-            plt.savefig(temp_file_path)
-            plt.close()
+        # SHAP Force Plot
+        plt.figure(figsize=(30, 6))
+        shap.plots.force(explainer_force[0], show=False,matplotlib=True, figsize=(30, 6))
+        plt.savefig(force_path, bbox_inches='tight')
+        plt.close()
 
-        # Return combined response: predictions and the file path to download the image
+        # SHAP Decision Plot
+        plt.figure(figsize=(25 ,10))
+        shap.plots.decision(
+            base_value=base_value,
+            shap_values=shap_values_array[0],
+            features=data_row,
+            feature_names=feature_names,
+            show=False, auto_size_plot=False
+        )
+        plt.savefig(decision_path, bbox_inches='tight')
+        plt.close()
+
+        # Create ZIP file
+        with ZipFile(zip_file_path, 'w') as zipf:
+            zipf.write(waterfall_path, "shap_waterfall.png")
+            zipf.write(force_path, "shap_force.png")
+            zipf.write(decision_path, "shap_decision.png")
+
+        # Cleanup individual plot files if desired
+        os.remove(waterfall_path)
+        os.remove(force_path)
+        os.remove(decision_path)
+
         return {
             "ID": input.ID,
-            "proba": proba,
+            "proba": f"{round(proba * 100, 2)} %",
             "bin": bin_num,
             "class": classification,
-            "shap_plot_download": f"/download_shap_plot/{os.path.basename(temp_file_path)}"
+            "decision": decision,
+            "shap_plots_download": f"/download_shap_plots/{unique_name}"
         }
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.get("/download_shap_plot/{image_name}")
-def download_shap_plot(image_name: str):
-    file_path = os.path.join(tempfile.gettempdir(), image_name)
+@app.get("/download_shap_plots/{zip_name}")
+def download_shap_plots(zip_name: str):
+    file_path = os.path.join(tempfile.gettempdir(), zip_name)
     if os.path.exists(file_path):
-        return FileResponse(file_path, media_type="image/png", filename="shap_waterfall.png")
-    raise HTTPException(status_code=404, detail="File not found")
+        return FileResponse(file_path, media_type="application/zip", filename="shap_plots.zip")
+    else:
+        raise HTTPException(status_code=404, detail="File not found")
+
 
 # Endpoint for batch predictions
 @app.post("/batch_predict_with_shap")
