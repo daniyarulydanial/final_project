@@ -34,7 +34,7 @@ function App() {
 
     const [file, setFile] = useState(null);
     const [response, setResponse] = useState(null);
-    const [shapPlotUrl, setShapPlotUrl] = useState(null);
+    const [shapZipUrl, setShapZipUrl] = useState(null);
     const [zipFileUrl, setZipFileUrl] = useState(null);
 
     const API_URL = import.meta.env.VITE_BASE_URL;
@@ -58,9 +58,9 @@ function App() {
                 console.log("Prediction Response:", result);
                 setResponse(result);
 
-                // Save SHAP plot URL
-                const shapUrl = new URL(result.shap_plot_download, API_URL).href;
-                setShapPlotUrl(shapUrl);
+                // Construct the URL to download the ZIP file with SHAP plots
+                const shapUrl = new URL(result.shap_plots_download, API_URL).href;
+                setShapZipUrl(shapUrl);
             } else {
                 alert("Error: Form submission failed");
             }
@@ -84,7 +84,7 @@ function App() {
                 const blob = await response.blob();
                 const url = window.URL.createObjectURL(blob);
 
-                // Save ZIP file URL
+                // Save ZIP file URL for batch results
                 setZipFileUrl(url);
             } else {
                 alert("Error: File upload failed");
@@ -133,27 +133,26 @@ function App() {
                         <strong>ID:</strong> {response.ID}
                     </p>
                     <p>
-                        <strong>Probability:</strong> {response.proba}
+                        <strong>Overdue Probability:</strong> {response.proba}
                     </p>
                     <p>
-                        <strong>Bin:</strong> {response.bin}
+                        <strong>Grade:</strong> {response.bin}
+                    </p>
+                    <p>
+                        <strong>Decision:</strong> {response.decision}
                     </p>
                     <p>
                         <strong>Class:</strong> {response.class}
                     </p>
-                    {shapPlotUrl && (
-                        <a
-                            href={shapPlotUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            Download SHAP Waterfall Plot
+                    {shapZipUrl && (
+                        <a href={shapZipUrl} download="shap_plots.zip">
+                            Download SHAP Plots (ZIP)
                         </a>
                     )}
                 </div>
             )}
 
-            {/* Display ZIP File Link */}
+            {/* Display ZIP File Link for Batch Results */}
             {zipFileUrl && (
                 <div className="response-container">
                     <h3>Batch Results</h3>
