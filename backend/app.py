@@ -142,8 +142,8 @@ def predict(input: ModelInput):
         plt.close()
 
         # SHAP Force Plot
-        plt.figure(figsize=(30, 6))
-        shap.plots.force(explainer_force[0], show=False,matplotlib=True, figsize=(30, 6))
+        plt.figure(figsize=(40, 6))
+        shap.plots.force(explainer_force[0], show=False,matplotlib=True, figsize=(40, 6))
         plt.savefig(force_path, bbox_inches='tight')
         plt.close()
 
