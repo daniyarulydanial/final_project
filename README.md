@@ -4,7 +4,7 @@
 Our project aims to build a comprehensive machine learning model for credit scoring. In today’s financial landscape, credit scoring presents significant challenges, particularly related to explainability and complexity.
 
 # The Team: 
-Daniaryuly Daniyal, Pirniyazov Miras, Baktibayev Daulet
+Daniaryuly Danial, Pirniyazov Miras, Baktibayev Daulet
 
 # Roles: 
 - Daniyaruly Danial: Data analysis and data preparation
