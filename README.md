@@ -7,7 +7,7 @@ Our project aims to build a comprehensive machine learning model for credit scor
 Daniaryuly Daniyal, Pirniyazov Miras, Baktibayev Daulet
 
 # Roles: 
-- Daniyaruly Daniyal: Data analysis and data preparation
+- Daniyaruly Danial: Data analysis and data preparation
 - Pirniyazov Miras: Modelling: model selection and tuning
 - Baktibayev Daulet: Evaluation and deployment: model interpretation and launching the model as a service
 
